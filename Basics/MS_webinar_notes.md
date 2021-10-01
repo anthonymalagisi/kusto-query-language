@@ -25,12 +25,12 @@ Choose input -> Filter on Condition <-> Parse & Prepare
 
 ### Filter
 
-#### where 
+### where 
 
 - This filters a table to the subset of rows that satisfies a condition
 - Can use "and", "or", and "not()"
 
-##### Examples
+#### Examples
 
 ```
 SecurityEvent
@@ -44,11 +44,11 @@ SecurityEvent
 
 (Note: "()" is the list operator. "Column in ()" will check if an item from the list shows up in the Column)
 
-#### search
+### search
 
 - Inefficient and not recommended for use in content. Good for interactive 
 
-##### Examples
+#### Examples
 
 ```
 SecurityEvent
@@ -58,13 +58,13 @@ SecurityEvent
 
 ### Parse and Prepare
 
-#### extend
+### extend
 
 - Used to create a calculated column and append to result set
 - Used extensively for parsing
 - Utilize built in functions for calculations like extract, parse, split, etc.
 
-##### Examples
+#### Examples
 
 ```
 SecurityEvent
@@ -75,7 +75,58 @@ SecurityEvent
 | project-keep _ResourceId, rgroup1, rgroup2, rgroup3, sub
 ```
 
+## Analyze
 
+### summarize
 
+- Takes input stream and aggregates content
+- Syntax: `T|summarize Aggregation [by Group Expression]`
+- Simple Aggregation functions: count(), sum(), avg(), min(), max()
+- Advanced functions: arg_min(), arg_max(), make_list(), countif()
+- Can override the default column name produced by using typing the desired resulting column name followed by an equals sign and the aggregate function. For example, `summarize Count=count() by EventID`
+- arg_max
 
+#### Examples
 
+```
+SecurityEvent
+| where TimeGenerated > ago(2d)
+| summarize Count=count() by EventID
+```
+
+### order by
+
+- sorts the table by a desired column ascending (asc) and descending (desc)
+- case operator is similar in logic to a switch statement where the value returned is based on a list of defined conditions and the result if the specific condition is met. Here is some general syntax. Each condition must be a boolean statement:
+
+```case(
+    Condition_1, Result_1,
+    Condition_2, Result_2,
+    ...
+    Condition_n, Result_n,
+    Default_Value)
+```
+
+- The case operator can be used if you wish to sort a table by string values
+
+#### Examples
+
+```
+AzureActivity 
+| where TimeGenerated >= ago(1d) 
+| extend Status=case(
+    ActivityStatusValue == "Success" or ActivityStatusValue == "Succeeded",2,
+    ActivityStatusValue == "Start" or ActivityStatusValue == "Started",1,
+    ActivityStatusValue == "Failed",0,
+    -1)
+| order by Status
+| project-away Status
+| take 3000
+```
+
+```
+SecurityEvent
+| where TimeGenerated >= ago(14d)
+| summarize Count=count() by EventID
+| order by Count desc
+```
