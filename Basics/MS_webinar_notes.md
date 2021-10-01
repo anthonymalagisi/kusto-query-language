@@ -156,4 +156,58 @@ SigninLogs
 | where applicationCount >= threshold
 ```
 
+## Prepare
+
+### project
+
+- Will select a number of fields to keep the results in. Can also remove specific fields (`project-remove`) and rename specific fields (`project-rename`)
+- `iff()` function similar to if in excel. Syntax: `iff(Condition,ValueIfTrue,ValueIfFalse)`
+
+#### Examples
+
+```
+SecurityEvent
+| where TimeGenerated >= ago(2d)
+| where EventID == 4688
+| project-keep TimeGenerated, Account, Computer, NewProcessName, ParentProcessName, CommandLine
+| order by TimeGenerated desc
+| limit 1000
+```
+
+```
+SecurityEvent
+| where TimeGenerated >= ago(2d)
+| where EventID == 4688
+| project-keep TimeGenerated, Account, Computer, NewProcessName, ParentProcessName, CommandLine
+| project-rename ProcessPath=NewProcessName, ParentProcessPath=ParentProcessName
+| order by TimeGenerated desc
+| limit 1000
+```
+
+```
+SecurityEvent
+| where TimeGenerated >= ago(2d)
+| where EventID == 4688
+| extend OfInterest = iff(ParentProcessName  has "LTSVC.exe","Yes","No")
+| project Account, Computer, OfInterest, NewProcessName, CommandLine 
+| limit 1000
+```
+
+### summarize with make_list() and make_set()
+
+- make_list() and make_set() are used to keep values of a summary group as a list.
+- This allows you to retain data lost normally through summarize
+- make_list() will keep all values
+- make_set() will keep a subset
+
+#### Examples
+
+This returns computers that have had a security event in the last ten minutes with a list of the associated accounts on that computer (who have had a security event)
+
+```
+SecurityEvent
+| where TimeGenerated >= ago(10m)
+| summarize make_set(Account) by Computer
+```
+
 
