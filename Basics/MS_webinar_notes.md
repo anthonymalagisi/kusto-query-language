@@ -84,7 +84,7 @@ SecurityEvent
 - Simple Aggregation functions: count(), sum(), avg(), min(), max()
 - Advanced functions: arg_min(), arg_max(), make_list(), countif()
 - Can override the default column name produced by using typing the desired resulting column name followed by an equals sign and the aggregate function. For example, `summarize Count=count() by EventID`
-- arg_max
+- arg_max() and arg_min() is a filtering option and will return the top or bottom records of the field specified. 
 
 #### Examples
 
@@ -92,6 +92,18 @@ SecurityEvent
 SecurityEvent
 | where TimeGenerated > ago(2d)
 | summarize Count=count() by EventID
+```
+
+```
+SecurityEvent
+| where TimeGenerated >= ago(60d)
+| summarize arg_max(TimeGenerated,AccountType,Computer,EventID,Activity) by Account
+| limit 1000
+```
+
+```
+SecurityEvent
+| summarize arg_max(TimeGenerated,*) by Account
 ```
 
 ### order by
@@ -130,3 +142,18 @@ SecurityEvent
 | summarize Count=count() by EventID
 | order by Count desc
 ```
+
+The following example is used for password spray detection:
+
+```
+let timeframe = 1d;
+let threshold = 3;
+SigninLogs
+| where TimeGenerated >= ago(timeframe)
+| where ResultType == "50057"
+| where ResultDescription =~ "User account is disabled. The account has been disabled by an administrator."
+| summarize applicationCount = dcount(AppDisplayName) by UserPrincipalName, IPAddress
+| where applicationCount >= threshold
+```
+
+
