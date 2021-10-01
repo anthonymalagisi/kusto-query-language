@@ -298,4 +298,6 @@ LowActivityAccounts
 
 ### JSON and Arrays
 
-
+- Use `todynamic()` to convert a JSON string to a dynamic object (similar to Python dictionaries)
+- Can refer to a field from a dynamic by using either `Dynamic.Key` or `Dynamic["Key"]
+- Use mv-expand to duplicate records
