@@ -210,4 +210,41 @@ SecurityEvent
 | summarize make_set(Account) by Computer
 ```
 
+## Visualize
+
+### summarize, bin, and timechart
+
+- bin is used to create bins which are ranges of numbers used to split a data set into groups, often used to create histograms
+- Useful with TimeGenerated
+- Syntax: `bin(Column,binSize)`
+
+#### Examples
+
+```
+SecurityEvent
+| where TimeGenerated >= ago(5d) and EventID == 4688
+| summarize count() by bin(TimeGenerated,1h)
+| render
+```
+
+### render
+
+- Generates a visualization
+- Syntax: `Table | render Visualization [with (PropertyName=PropertyValue [,...])]`
+- Types of visualizations:
+    - areachart     
+    - barchart      
+    - columnchart   
+    - piechart      
+    - scatterchart  
+    - timechart     : Displays how a value changes over time
+
+#### Examples
+
+```
+SecurityEvent
+| where TimeGenerated >= ago(5d)
+| summarize ProcessCount=countif(EventID == 4688), OtherCount=countif(EventID != 4688) by bin(TimeGenerated, 1h)
+| render timechart 
+```
 
