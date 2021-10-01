@@ -271,7 +271,22 @@ SecurityEvent
 
 ### materialize
 
+- "Use with let to cache and reuse the results of a query rather than run the query multiple times. Faster and ensures the same results are used.)
+- From [KQL Documentation] (https://docs.microsoft.com/en-us/azure/data-explorer/kusto/query/materializefunction#:~:text=Materialize%20has%20a%20cache%20size%20limit%20of%205,set%20and%20keep%20the%20semantics%20of%20the%20query.) :
+    - "Allows caching a subquery result during the time of query execution in a way that other subqueries can reference the partial result."
+    - "... has a cache size limit of 5GB. This limit is per cluster node ... If a query uses `materialize() and the cach can't hold any more data, the query will abort with an error."
 
+#### Examples
+
+```
+let LowActivityAccounts = 
+    materialize( SecurityEvent 
+                 | summarize Count=count() by Account 
+                 | where Count < 10);
+LowActivityAccounts
+| where Account contains "Mal"
+| union (LowActivityAccounts | where Account contains "Rep")
+```
 
 ### union
 
