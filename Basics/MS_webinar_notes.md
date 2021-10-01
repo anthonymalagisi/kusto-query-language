@@ -247,4 +247,40 @@ SecurityEvent
 | summarize ProcessCount=countif(EventID == 4688), OtherCount=countif(EventID != 4688) by bin(TimeGenerated, 1h)
 | render timechart 
 ```
+## Advanced Topics
+
+### let statements
+
+- Use `let` to declare variables
+- Syntax: `let VariableName = Value;`
+- Variables can store any data type, including tables. For static tables, use `datatable`
+
+#### Examples
+
+```
+let days = 10d;
+let IdOfInterest = 4688;
+let suspiciousAccounts = datatable(account: string) [
+    @"\administrator",
+    @"NT AUTHORITY\SYSTEM"];
+SecurityEvent
+| where TimeGenerated >= ago(days)
+| where EventID == IdOfInterest
+| where Account in (suspiciousAccounts)
+```
+
+### materialize
+
+
+
+### union
+
+
+
+### join
+
+
+
+### JSON and Arrays
+
 
